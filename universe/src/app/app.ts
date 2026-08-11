@@ -18,72 +18,47 @@ import {
   styleUrl: './app.scss',
 })
 export class App implements AfterViewInit, OnDestroy {
-  @ViewChild('universeCanvas', {
-    static: true,
-  })
+  @ViewChild('universeCanvas', { static: true })
   private readonly canvas!: ElementRef<HTMLCanvasElement>;
 
-  @ViewChild('loader', {
-    static: true,
-  })
+  @ViewChild('loader', { static: true })
   private readonly loader!: ElementRef<HTMLElement>;
 
-  @ViewChild('loaderBar', {
-    static: true,
-  })
+  @ViewChild('loaderBar', { static: true })
   private readonly loaderBar!: ElementRef<HTMLElement>;
 
-  @ViewChild('loaderPulse', {
-    static: true,
-  })
+  @ViewChild('loaderPulse', { static: true })
   private readonly loaderPulse!: ElementRef<HTMLElement>;
 
-  @ViewChild('progress', {
-    static: true,
-  })
+  @ViewChild('progress', { static: true })
   private readonly progress!: ElementRef<HTMLElement>;
 
-  @ViewChild('status', {
-    static: true,
-  })
+  @ViewChild('status', { static: true })
   private readonly status!: ElementRef<HTMLElement>;
 
-  @ViewChild('welcomeGroup', {
-    static: true,
-  })
-  private readonly welcomeGroup!: ElementRef<HTMLElement>;
+  @ViewChild('readyGroup', { static: true })
+  private readonly readyGroup!: ElementRef<HTMLElement>;
 
-  @ViewChild('ready', {
-    static: true,
-  })
+  @ViewChild('ready', { static: true })
   private readonly ready!: ElementRef<HTMLElement>;
 
-  @ViewChild('title', {
-    static: true,
-  })
+  @ViewChild('welcomeGroup', { static: true })
+  private readonly welcomeGroup!: ElementRef<HTMLElement>;
+
+  @ViewChild('title', { static: true })
   private readonly title!: ElementRef<HTMLElement>;
 
-  @ViewChild('subtitle', {
-    static: true,
-  })
+  @ViewChild('subtitle', { static: true })
   private readonly subtitle!: ElementRef<HTMLElement>;
 
-  @ViewChild('enterButton', {
-    static: true,
-  })
+  @ViewChild('enterButton', { static: true })
   private readonly enterButton!: ElementRef<HTMLButtonElement>;
 
   private engine?: UniverseEngine;
-
-  private readonly arrival =
-    new UniverseArrival();
+  private readonly arrival = new UniverseArrival();
 
   ngAfterViewInit(): void {
-    this.engine =
-      new UniverseEngine(
-        this.canvas.nativeElement,
-      );
-
+    this.engine = new UniverseEngine(this.canvas.nativeElement);
     this.engine.start();
 
     this.arrival.playLoadingSequence(
@@ -92,59 +67,32 @@ export class App implements AfterViewInit, OnDestroy {
       this.loadingElements,
     );
 
-    this.enterButton.nativeElement.addEventListener(
-      'click',
-      this.handleEnter,
-    );
+    this.enterButton.nativeElement.addEventListener('click', this.handleEnter);
   }
 
   ngOnDestroy(): void {
-    this.enterButton.nativeElement.removeEventListener(
-      'click',
-      this.handleEnter,
-    );
-
+    this.enterButton.nativeElement.removeEventListener('click', this.handleEnter);
     this.engine?.dispose();
   }
 
   private get loadingElements(): ArrivalElements {
     return {
-      loader:
-        this.loader.nativeElement,
-
-      loaderBar:
-        this.loaderBar.nativeElement,
-
-      loaderPulse:
-        this.loaderPulse.nativeElement,
-
-      progress:
-        this.progress.nativeElement,
-
-      status:
-        this.status.nativeElement,
-
-      welcomeGroup:
-        this.welcomeGroup.nativeElement,
-
-      ready:
-        this.ready.nativeElement,
-
-      title:
-        this.title.nativeElement,
-
-      subtitle:
-        this.subtitle.nativeElement,
-
-      enterButton:
-        this.enterButton.nativeElement,
+      loader: this.loader.nativeElement,
+      loaderBar: this.loaderBar.nativeElement,
+      loaderPulse: this.loaderPulse.nativeElement,
+      progress: this.progress.nativeElement,
+      status: this.status.nativeElement,
+      readyGroup: this.readyGroup.nativeElement,
+      ready: this.ready.nativeElement,
+      welcomeGroup: this.welcomeGroup.nativeElement,
+      title: this.title.nativeElement,
+      subtitle: this.subtitle.nativeElement,
+      enterButton: this.enterButton.nativeElement,
     };
   }
 
   private handleEnter = (): void => {
-    if (!this.engine) {
-      return;
-    }
+    if (!this.engine) return;
 
     this.arrival.enterUniverse(
       this.engine.cameraManager.camera,
