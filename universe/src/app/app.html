@@ -6,14 +6,8 @@
   ></canvas>
 
   <section class="boot-overlay">
-    <div
-      #loader
-      class="loading-state"
-      aria-live="polite"
-    >
-      <div class="loading-state__brand">
-        SREE'S UNIVERSE
-      </div>
+    <div #loader class="loading-state" aria-live="polite">
+      <div class="loading-state__brand">SREE'S UNIVERSE</div>
 
       <div class="loading-state__line">
         <span #loaderBar class="loading-state__bar"></span>
@@ -26,30 +20,21 @@
       </div>
     </div>
 
-    <div
-      #welcomeGroup
-      class="welcome-state"
-      aria-hidden="true"
-    >
-      <p #ready class="welcome-state__ready">
-        UNIVERSE READY
-      </p>
+    <div #readyGroup class="ready-state" aria-hidden="true">
+      <div class="ready-state__mark">✦</div>
+      <p #ready class="ready-state__text">UNIVERSE READY</p>
+    </div>
 
+    <div #welcomeGroup class="welcome-state" aria-hidden="true">
       <p class="welcome-state__intro">Welcome to</p>
 
-      <h1 #title class="welcome-state__title">
-        Sree's Universe
-      </h1>
+      <h1 #title class="welcome-state__title">Sree's Universe</h1>
 
       <p #subtitle class="welcome-state__subtitle">
         Explore the mind behind the machines.
       </p>
 
-      <button
-        #enterButton
-        class="enter-button"
-        type="button"
-      >
+      <button #enterButton class="enter-button" type="button">
         ENTER THE UNIVERSE
       </button>
     </div>
