@@ -1,90 +1,110 @@
 import * as THREE from 'three';
 
+type Car = {
+  group: THREE.Group;
+  speed: number;
+  offset: number;
+  smoke: THREE.Mesh[];
+};
+
 export class HomeWorld {
   readonly group = new THREE.Group();
 
-  private readonly planet: THREE.Mesh;
-  private readonly atmosphere: THREE.Mesh;
-  private readonly rings: THREE.Mesh[] = [];
-  private readonly locations: THREE.Group[] = [];
-
+  private readonly trackCurve: THREE.CatmullRomCurve3;
+  private readonly cars: Car[] = [];
+  private readonly smokeMaterial: THREE.MeshBasicMaterial;
+  private readonly roadMaterial: THREE.MeshStandardMaterial;
   private opacity = 0;
+  private elapsed = 0;
 
   constructor() {
-    this.group.position.set(0, -1.5, -18);
-    this.group.scale.setScalar(0.001);
+    this.group.position.set(0, -2.2, -10);
+    this.group.scale.setScalar(1);
 
-    this.planet = new THREE.Mesh(
-      new THREE.SphereGeometry(4.2, 64, 64),
-      new THREE.MeshStandardMaterial({
-        color: 0x162033,
-        roughness: 0.72,
-        metalness: 0.12,
-        transparent: true,
-        opacity: 0,
-      }),
+    this.trackCurve = new THREE.CatmullRomCurve3(
+      [
+        new THREE.Vector3(-13, 0, 5),
+        new THREE.Vector3(-7, 0, -5),
+        new THREE.Vector3(1, 0, -7),
+        new THREE.Vector3(10, 0, -4),
+        new THREE.Vector3(13, 0, 3),
+        new THREE.Vector3(8, 0, 8),
+        new THREE.Vector3(-2, 0, 9),
+        new THREE.Vector3(-10, 0, 7),
+      ],
+      true,
+      'catmullrom',
+      0.45,
     );
 
-    this.atmosphere = new THREE.Mesh(
-      new THREE.SphereGeometry(4.55, 64, 64),
-      new THREE.MeshBasicMaterial({
-        color: 0x6ea8ff,
-        transparent: true,
-        opacity: 0,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      }),
-    );
+    this.roadMaterial = new THREE.MeshStandardMaterial({
+      color: 0x111318,
+      roughness: 0.72,
+      metalness: 0.28,
+      transparent: true,
+      opacity: 0,
+    });
 
-    this.group.add(this.planet, this.atmosphere);
-    this.createRings();
-    this.createLocations();
+    this.smokeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xd9d5ca,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+    });
+
+    this.createTrack();
+    this.createEnvironment();
+    this.createCar(0, 0xffb347, 0.105);
+    this.createCar(1, 0xdce7f5, 0.092);
   }
 
   update(): void {
-    this.group.rotation.y += 0.0007;
+    this.elapsed += 0.016;
 
-    this.rings.forEach((ring, index) => {
-      ring.rotation.z += 0.0012 + index * 0.00035;
+    this.cars.forEach((car, index) => {
+      const t = (this.elapsed * car.speed + car.offset) % 1;
+      const position = this.trackCurve.getPointAt(t);
+      const tangent = this.trackCurve.getTangentAt(t).normalize();
+
+      car.group.position.copy(position);
+      car.group.rotation.y = Math.atan2(tangent.x, tangent.z);
+
+      car.smoke.forEach((particle, particleIndex) => {
+        const life = (this.elapsed * 0.75 + particleIndex * 0.13 + index * 0.2) % 1;
+        const spread = Math.sin(particleIndex * 7.31) * 0.5;
+
+        particle.position.set(
+          -tangent.x * (0.7 + life * 3.1) + spread * 0.5,
+          0.18 + life * 0.95,
+          -tangent.z * (0.7 + life * 3.1) + Math.cos(particleIndex * 4.2) * 0.35,
+        );
+
+        const scale = 0.14 + life * 0.5;
+        particle.scale.setScalar(scale);
+        particle.rotation.z += 0.01;
+      });
     });
 
-    this.locations.forEach((location, index) => {
-      const angle = performance.now() * 0.00008 + index;
-      location.position.y += Math.sin(angle) * 0.00025;
-      location.rotation.y += 0.001;
-    });
+    // Slow environmental motion keeps the scene alive without moving the camera.
+    this.group.rotation.y = Math.sin(this.elapsed * 0.08) * 0.012;
   }
 
   setOpacity(opacity: number): void {
     this.opacity = THREE.MathUtils.clamp(opacity, 0, 1);
 
-    const planetMaterial = this.planet.material;
-    const atmosphereMaterial = this.atmosphere.material;
+    this.group.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
 
-    if (!Array.isArray(planetMaterial)) {
-      planetMaterial.opacity = this.opacity;
-    }
-
-    if (!Array.isArray(atmosphereMaterial)) {
-      atmosphereMaterial.opacity = this.opacity * 0.18;
-    }
-
-    this.rings.forEach((ring) => {
-      const material = ring.material;
-      if (!Array.isArray(material)) {
-        material.opacity = this.opacity * 0.22;
+      const material = object.material;
+      if (Array.isArray(material)) {
+        material.forEach((item) => {
+          item.transparent = true;
+          item.opacity = this.opacity * this.opacityMultiplier(item);
+        });
+      } else {
+        material.transparent = true;
+        material.opacity = this.opacity * this.opacityMultiplier(material);
       }
-    });
-
-    this.locations.forEach((location) => {
-      location.traverse((object) => {
-        if (object instanceof THREE.Mesh) {
-          const material = object.material;
-          if (!Array.isArray(material)) {
-            material.opacity = this.opacity * 0.9;
-          }
-        }
-      });
     });
   }
 
@@ -103,92 +123,185 @@ export class HomeWorld {
     });
   }
 
-  private createRings(): void {
-    const ringConfigs = [
-      { radius: 6.2, tube: 0.018, rotation: 0.55 },
-      { radius: 7.1, tube: 0.012, rotation: -0.42 },
-    ];
-
-    ringConfigs.forEach((config) => {
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(
-          config.radius,
-          config.tube,
-          8,
-          160,
-        ),
-        new THREE.MeshBasicMaterial({
-          color: 0x8db8ff,
-          transparent: true,
-          opacity: 0,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-        }),
-      );
-
-      ring.rotation.x = Math.PI / 2 + config.rotation;
-      this.rings.push(ring);
-      this.group.add(ring);
-    });
+  private opacityMultiplier(material: THREE.Material): number {
+    if (material === this.smokeMaterial) return 0.32;
+    if (material === this.roadMaterial) return 0.92;
+    return 0.95;
   }
 
-  private createLocations(): void {
-    const colors = [
-      0xffb347,
-      0x6ea8ff,
-      0xb48cff,
-      0x67e8c7,
-      0xff7892,
-      0xffffff,
-    ];
+  private createTrack(): void {
+    const road = new THREE.Mesh(
+      new THREE.TubeGeometry(this.trackCurve, 180, 2.05, 12, true),
+      this.roadMaterial,
+    );
+    road.scale.y = 0.12;
+    this.group.add(road);
 
-    const radius = 7.8;
+    const laneMaterial = new THREE.MeshBasicMaterial({
+      color: 0xc9c3b5,
+      transparent: true,
+      opacity: 0,
+    });
 
-    for (let i = 0; i < 6; i += 1) {
-      const location = new THREE.Group();
-      const angle = (i / 6) * Math.PI * 2;
+    const lane = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(
+        this.trackCurve.getPoints(220),
+      ),
+      laneMaterial,
+    );
+    lane.position.y = 0.27;
+    lane.scale.setScalar(0.72);
+    this.group.add(lane);
 
-      location.position.set(
-        Math.cos(angle) * radius,
-        Math.sin(angle * 1.7) * 0.8,
-        Math.sin(angle) * radius,
-      );
+    const innerCurve = this.trackCurve.clone();
+    const curbMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffb347,
+      transparent: true,
+      opacity: 0,
+    });
 
-      const platform = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.72, 0.9, 0.16, 20),
-        new THREE.MeshStandardMaterial({
-          color: 0x1b2538,
-          roughness: 0.55,
-          metalness: 0.35,
-          transparent: true,
-          opacity: 0,
-        }),
-      );
+    const curb = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(innerCurve.getPoints(220)),
+      curbMaterial,
+    );
+    curb.position.y = 0.31;
+    curb.scale.setScalar(0.84);
+    this.group.add(curb);
 
-      const tower = new THREE.Mesh(
-        new THREE.BoxGeometry(0.38, 1.25, 0.38),
-        new THREE.MeshStandardMaterial({
-          color: colors[i],
-          emissive: colors[i],
-          emissiveIntensity: 1.2,
-          transparent: true,
-          opacity: 0,
-        }),
-      );
+    const start = this.trackCurve.getPointAt(0);
+    const finish = new THREE.Mesh(
+      new THREE.BoxGeometry(4.2, 0.04, 0.12),
+      new THREE.MeshBasicMaterial({
+        color: 0xf5f1e8,
+        transparent: true,
+        opacity: 0,
+      }),
+    );
+    finish.position.copy(start);
+    finish.position.y = 0.34;
+    finish.rotation.y = Math.atan2(
+      this.trackCurve.getTangentAt(0).x,
+      this.trackCurve.getTangentAt(0).z,
+    );
+    this.group.add(finish);
+  }
 
-      const beacon = new THREE.Mesh(
-        new THREE.SphereGeometry(0.11, 16, 16),
+  private createEnvironment(): void {
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(80, 80),
+      new THREE.MeshStandardMaterial({
+        color: 0x05070a,
+        roughness: 0.9,
+        metalness: 0.08,
+        transparent: true,
+        opacity: 0,
+      }),
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.35;
+    this.group.add(ground);
+
+    for (let i = 0; i < 18; i += 1) {
+      const light = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 0.55, 0.08),
         new THREE.MeshBasicMaterial({
-          color: colors[i],
+          color: i % 3 === 0 ? 0xffb347 : 0xdde7ff,
           transparent: true,
           opacity: 0,
         }),
       );
 
-      beacon.position.y = 0.75;
-      location.add(platform, tower, beacon);
-      this.locations.push(location);
-      this.group.add(location);
+      const t = i / 18;
+      const point = this.trackCurve.getPointAt(t);
+      const tangent = this.trackCurve.getTangentAt(t).normalize();
+      const normal = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
+
+      light.position.copy(point).addScaledVector(normal, 2.9);
+      light.position.y = 0.15;
+      this.group.add(light);
     }
+  }
+
+  private createCar(index: number, color: number, speed: number): void {
+    const carGroup = new THREE.Group();
+
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(1.7, 0.34, 3.1),
+      new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.26,
+        metalness: 0.72,
+        transparent: true,
+        opacity: 0,
+      }),
+    );
+    body.position.y = 0.48;
+    body.scale.x = 0.82;
+
+    const cabin = new THREE.Mesh(
+      new THREE.BoxGeometry(1.05, 0.28, 1.28),
+      new THREE.MeshStandardMaterial({
+        color: 0x080a0d,
+        roughness: 0.12,
+        metalness: 0.45,
+        transparent: true,
+        opacity: 0,
+      }),
+    );
+    cabin.position.set(0, 0.78, 0.12);
+
+    const nose = new THREE.Mesh(
+      new THREE.BoxGeometry(1.25, 0.2, 0.65),
+      new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.2,
+        metalness: 0.75,
+        transparent: true,
+        opacity: 0,
+      }),
+    );
+    nose.position.set(0, 0.42, -1.32);
+
+    carGroup.add(body, cabin, nose);
+
+    const wheelMaterial = new THREE.MeshStandardMaterial({
+      color: 0x050505,
+      roughness: 0.88,
+      metalness: 0.12,
+      transparent: true,
+      opacity: 0,
+    });
+
+    [-0.72, 0.72].forEach((x) => {
+      [-1.0, 1.0].forEach((z) => {
+        const wheel = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.25, 0.25, 0.14, 18),
+          wheelMaterial,
+        );
+        wheel.rotation.z = Math.PI / 2;
+        wheel.position.set(x, 0.3, z);
+        carGroup.add(wheel);
+      });
+    });
+
+    const smoke: THREE.Mesh[] = [];
+    for (let i = 0; i < 16; i += 1) {
+      const particle = new THREE.Mesh(
+        new THREE.SphereGeometry(0.28, 10, 10),
+        this.smokeMaterial.clone(),
+      );
+      particle.position.y = 0.2;
+      carGroup.add(particle);
+      smoke.push(particle);
+    }
+
+    this.group.add(carGroup);
+
+    this.cars.push({
+      group: carGroup,
+      speed,
+      offset: index === 0 ? 0.02 : 0.49,
+      smoke,
+    });
   }
 }
