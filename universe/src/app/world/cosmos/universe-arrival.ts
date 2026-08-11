@@ -106,7 +106,12 @@ export class UniverseArrival {
     this.enterTimeline.to(camera.position, { z: 5, duration: 4.5, ease: 'power4.in' }, '<');
     this.enterTimeline.call(() => { warpField.setSpeed(2.2); });
 
-    this.enterTimeline.to(camera.position, { z: 13, y: 0.8, duration: 2.4, ease: 'power3.out' });
+    // Preserve the existing camera angle. Only the distance changes.
+    this.enterTimeline.to(camera.position, {
+      z: 13,
+      duration: 2.4,
+      ease: 'power3.out',
+    });
     this.enterTimeline.to(camera, {
       fov: 58,
       duration: 1.8,
