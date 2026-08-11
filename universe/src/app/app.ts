@@ -1,13 +1,156 @@
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { NxWelcome } from './nx-welcome';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
+
+import { UniverseEngine } from './core/engine/universe-engine';
+import {
+  ArrivalElements,
+  UniverseArrival,
+} from './world/cosmos/universe-arrival';
 
 @Component({
-  imports: [NxWelcome, RouterModule],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {
-  protected title = 'universe';
+export class App implements AfterViewInit, OnDestroy {
+  @ViewChild('universeCanvas', {
+    static: true,
+  })
+  private readonly canvas!: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('loader', {
+    static: true,
+  })
+  private readonly loader!: ElementRef<HTMLElement>;
+
+  @ViewChild('loaderBar', {
+    static: true,
+  })
+  private readonly loaderBar!: ElementRef<HTMLElement>;
+
+  @ViewChild('loaderPulse', {
+    static: true,
+  })
+  private readonly loaderPulse!: ElementRef<HTMLElement>;
+
+  @ViewChild('progress', {
+    static: true,
+  })
+  private readonly progress!: ElementRef<HTMLElement>;
+
+  @ViewChild('status', {
+    static: true,
+  })
+  private readonly status!: ElementRef<HTMLElement>;
+
+  @ViewChild('welcomeGroup', {
+    static: true,
+  })
+  private readonly welcomeGroup!: ElementRef<HTMLElement>;
+
+  @ViewChild('ready', {
+    static: true,
+  })
+  private readonly ready!: ElementRef<HTMLElement>;
+
+  @ViewChild('title', {
+    static: true,
+  })
+  private readonly title!: ElementRef<HTMLElement>;
+
+  @ViewChild('subtitle', {
+    static: true,
+  })
+  private readonly subtitle!: ElementRef<HTMLElement>;
+
+  @ViewChild('enterButton', {
+    static: true,
+  })
+  private readonly enterButton!: ElementRef<HTMLButtonElement>;
+
+  private engine?: UniverseEngine;
+
+  private readonly arrival =
+    new UniverseArrival();
+
+  ngAfterViewInit(): void {
+    this.engine =
+      new UniverseEngine(
+        this.canvas.nativeElement,
+      );
+
+    this.engine.start();
+
+    this.arrival.playLoadingSequence(
+      this.engine.cameraManager.camera,
+      this.engine.galaxy,
+      this.loadingElements,
+    );
+
+    this.enterButton.nativeElement.addEventListener(
+      'click',
+      this.handleEnter,
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.enterButton.nativeElement.removeEventListener(
+      'click',
+      this.handleEnter,
+    );
+
+    this.engine?.dispose();
+  }
+
+  private get loadingElements(): ArrivalElements {
+    return {
+      loader:
+        this.loader.nativeElement,
+
+      loaderBar:
+        this.loaderBar.nativeElement,
+
+      loaderPulse:
+        this.loaderPulse.nativeElement,
+
+      progress:
+        this.progress.nativeElement,
+
+      status:
+        this.status.nativeElement,
+
+      welcomeGroup:
+        this.welcomeGroup.nativeElement,
+
+      ready:
+        this.ready.nativeElement,
+
+      title:
+        this.title.nativeElement,
+
+      subtitle:
+        this.subtitle.nativeElement,
+
+      enterButton:
+        this.enterButton.nativeElement,
+    };
+  }
+
+  private handleEnter = (): void => {
+    if (!this.engine) {
+      return;
+    }
+
+    this.arrival.enterUniverse(
+      this.engine.cameraManager.camera,
+      this.engine.galaxy,
+      this.engine.warpField,
+      this.loadingElements,
+    );
+  };
 }

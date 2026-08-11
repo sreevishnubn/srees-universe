@@ -4,29 +4,211 @@
   "pathMappings": {},
   "nxJsonPlugins": [],
   "fileMap": {
-    "projectFileMap": {},
+    "projectFileMap": {
+      "universe": [
+        {
+          "file": "universe/eslint.config.mjs",
+          "hash": "8316703290611874753",
+          "deps": [
+            "npm:@nx/eslint-plugin"
+          ]
+        },
+        {
+          "file": "universe/jest.config.cts",
+          "hash": "13734404855257851329"
+        },
+        {
+          "file": "universe/project.json",
+          "hash": "5248750560323236790"
+        },
+        {
+          "file": "universe/public/favicon.ico",
+          "hash": "9303420814833116677"
+        },
+        {
+          "file": "universe/src/app/app.config.ts",
+          "hash": "17072567673578843235",
+          "deps": [
+            "npm:@angular/core",
+            "npm:@angular/router"
+          ]
+        },
+        {
+          "file": "universe/src/app/app.html",
+          "hash": "461446905465784497"
+        },
+        {
+          "file": "universe/src/app/app.routes.ts",
+          "hash": "6185150965714414910",
+          "deps": [
+            "npm:@angular/router"
+          ]
+        },
+        {
+          "file": "universe/src/app/app.scss",
+          "hash": "5234312823954917690"
+        },
+        {
+          "file": "universe/src/app/app.spec.ts",
+          "hash": "3189984632640688601",
+          "deps": [
+            "npm:@angular/core"
+          ]
+        },
+        {
+          "file": "universe/src/app/app.ts",
+          "hash": "1777057159754116731",
+          "deps": [
+            "npm:@angular/core"
+          ]
+        },
+        {
+          "file": "universe/src/app/core/animation/intro-sequence.ts",
+          "hash": "9028620368890029756",
+          "deps": [
+            "npm:gsap"
+          ]
+        },
+        {
+          "file": "universe/src/app/core/camera/camera-manager.ts",
+          "hash": "4098916617971615386",
+          "deps": [
+            "npm:three"
+          ]
+        },
+        {
+          "file": "universe/src/app/core/engine/universe-engine.ts",
+          "hash": "12897116919477150316"
+        },
+        {
+          "file": "universe/src/app/core/lighting/lighting-manager.ts",
+          "hash": "5312433254052761764",
+          "deps": [
+            "npm:three"
+          ]
+        },
+        {
+          "file": "universe/src/app/core/renderer/universe-renderer.ts",
+          "hash": "18176457347786391963",
+          "deps": [
+            "npm:three"
+          ]
+        },
+        {
+          "file": "universe/src/app/core/scene/scene-manager.ts",
+          "hash": "14753585144060120483",
+          "deps": [
+            "npm:three"
+          ]
+        },
+        {
+          "file": "universe/src/app/world/cosmos/galaxy.ts",
+          "hash": "4102259660974072383",
+          "deps": [
+            "npm:three"
+          ]
+        },
+        {
+          "file": "universe/src/app/world/cosmos/universe-arrival.ts",
+          "hash": "11318469526717109588",
+          "deps": [
+            "npm:three",
+            "npm:gsap"
+          ]
+        },
+        {
+          "file": "universe/src/app/world/cosmos/warp-field.ts",
+          "hash": "3808586475343855874",
+          "deps": [
+            "npm:three"
+          ]
+        },
+        {
+          "file": "universe/src/index.html",
+          "hash": "15602265799701526787"
+        },
+        {
+          "file": "universe/src/main.ts",
+          "hash": "3820470197416434450",
+          "deps": [
+            "npm:@angular/platform-browser"
+          ]
+        },
+        {
+          "file": "universe/src/styles.scss",
+          "hash": "5195668842064076916"
+        },
+        {
+          "file": "universe/src/test-setup.ts",
+          "hash": "3126369567656231816",
+          "deps": [
+            "npm:jest-preset-angular"
+          ]
+        },
+        {
+          "file": "universe/tsconfig.app.json",
+          "hash": "16552542629508565339"
+        },
+        {
+          "file": "universe/tsconfig.json",
+          "hash": "16799350628383229467"
+        },
+        {
+          "file": "universe/tsconfig.spec.json",
+          "hash": "2957369330480001810"
+        }
+      ]
+    },
     "nonProjectFiles": [
+      {
+        "file": ".gitignore",
+        "hash": "14771293874652909549"
+      },
+      {
+        "file": ".prettierignore",
+        "hash": "5407418692668764289"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "16267754514737964994"
+      },
       {
         "file": "README.md",
         "hash": "9435911731941704194"
       },
       {
+        "file": "eslint.config.mjs",
+        "hash": "9002143704707986394"
+      },
+      {
+        "file": "jest.config.ts",
+        "hash": "14236175072743533737"
+      },
+      {
+        "file": "jest.preset.js",
+        "hash": "13737983450217408137"
+      },
+      {
         "file": "nx.json",
-        "hash": "207397795479391539"
+        "hash": "12767084767555671330"
       },
       {
         "file": "package.json",
-        "hash": "876601904546741262"
+        "hash": "17345895555240523173"
       },
       {
         "file": "pnpm-lock.yaml",
-        "hash": "8347271282459043412"
+        "hash": "9486155992608387397"
       },
       {
         "file": "pnpm-workspace.yaml",
-        "hash": "12948673071870788365"
+        "hash": "8348753986038617573"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "16045640222629858288"
       }
     ]
   },
-  "externalNodesHash": "13158908072454855340"
+  "externalNodesHash": "6764099095296046829"
 }

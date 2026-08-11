@@ -1,0 +1,298 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.universe {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+
+  background: #020306;
+  color: #f5f7fa;
+}
+
+.universe__canvas {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+}
+
+/* -------------------------------- */
+/* GLOBAL OVERLAY */
+/* -------------------------------- */
+
+.boot-overlay {
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 179, 71, 0.025),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at center,
+      transparent 30%,
+      rgba(0, 0, 0, 0.3) 75%,
+      rgba(0, 0, 0, 0.72) 100%
+    );
+}
+
+/* -------------------------------- */
+/* LOADING STATE */
+/* -------------------------------- */
+
+.loading-state {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: min(420px, 72vw);
+
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+.loading-state__brand {
+  margin-bottom: 24px;
+
+  font-size: 11px;
+  font-weight: 500;
+
+  letter-spacing: 0.38em;
+
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.loading-state__line {
+  position: relative;
+
+  width: 100%;
+  height: 2px;
+
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.loading-state__bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+
+  width: 0%;
+
+  background: linear-gradient(
+    90deg,
+    rgba(255, 179, 71, 0.4),
+    #ffb347
+  );
+
+  box-shadow:
+    0 0 18px rgba(255, 179, 71, 0.35);
+}
+
+.loading-state__pulse {
+  position: absolute;
+
+  left: 0;
+  top: 50%;
+
+  width: 7px;
+  height: 7px;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: #fff4df;
+
+  box-shadow:
+    0 0 10px #ffb347,
+    0 0 24px rgba(255, 179, 71, 0.55);
+}
+
+.loading-state__meta {
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+
+  margin-top: 10px;
+
+  font-size: 9px;
+
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.loading-state__meta span:last-child {
+  color: #ffb347;
+}
+
+/* -------------------------------- */
+/* WELCOME STATE */
+/* -------------------------------- */
+
+.welcome-state {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: min(1000px, 90vw);
+
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+
+  opacity: 0;
+}
+
+.welcome-state__ready {
+  margin: 0 0 22px;
+
+  font-size: 9px;
+
+  letter-spacing: 0.48em;
+
+  color: #ffb347;
+}
+
+.welcome-state__intro {
+  margin: 0 0 8px;
+
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+
+  letter-spacing: 0.08em;
+
+  color: rgba(245, 247, 250, 0.62);
+}
+
+.welcome-state__title {
+  margin: 0;
+
+  font-size:
+    clamp(4.2rem, 9vw, 8.8rem);
+
+  line-height: 0.9;
+
+  letter-spacing: -0.055em;
+
+  font-weight: 600;
+
+  color: #f5f7fa;
+
+  text-shadow:
+    0 0 70px
+    rgba(255, 255, 255, 0.055);
+}
+
+.welcome-state__subtitle {
+  margin: 26px 0 0;
+
+  font-size:
+    clamp(0.9rem, 1.4vw, 1.1rem);
+
+  letter-spacing: 0.06em;
+
+  color: rgba(245, 247, 250, 0.5);
+}
+
+/* -------------------------------- */
+/* ENTER BUTTON */
+/* -------------------------------- */
+
+.enter-button {
+  margin-top: 42px;
+
+  min-width: 245px;
+  height: 54px;
+
+  padding: 0 30px;
+
+  pointer-events: auto;
+
+  border: 1px solid
+    rgba(255, 179, 71, 0.5);
+
+  background:
+    rgba(4, 5, 8, 0.55);
+
+  color: #f5f7fa;
+
+  font-size: 10px;
+
+  font-weight: 600;
+
+  letter-spacing: 0.24em;
+
+  backdrop-filter: blur(14px);
+
+  cursor: pointer;
+
+  transition:
+    transform 240ms ease,
+    background 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease;
+}
+
+.enter-button:hover {
+  transform: translateY(-3px);
+
+  background:
+    rgba(255, 179, 71, 0.08);
+
+  border-color:
+    rgba(255, 179, 71, 0.95);
+
+  box-shadow:
+    0 0 35px
+    rgba(255, 179, 71, 0.12);
+}
+
+.enter-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* -------------------------------- */
+/* MOBILE */
+/* -------------------------------- */
+
+@media (max-width: 700px) {
+  .loading-state {
+    width: 78vw;
+  }
+
+  .welcome-state__title {
+    font-size:
+      clamp(3.2rem, 15vw, 5.4rem);
+  }
+
+  .enter-button {
+    min-width: 215px;
+  }
+}

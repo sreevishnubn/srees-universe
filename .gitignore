@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment secrets
+.env
+.env.*
+
+
+# Nx
+.nx/
+nx-cloud.env
+
+# Angular
+.angular/
+dist/
+tmp/
+
+# Testing
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

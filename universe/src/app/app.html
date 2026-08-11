@@ -1,2 +1,79 @@
-<app-nx-welcome></app-nx-welcome>
-<router-outlet></router-outlet>
+<main class="universe">
+  <canvas
+    #universeCanvas
+    class="universe__canvas"
+    aria-label="Sree's Universe"
+  ></canvas>
+
+  <section
+    #bootOverlay
+    class="boot-overlay"
+  >
+    <!-- STATE 1: LOADING -->
+    <div
+      #loader
+      class="loading-state"
+      aria-live="polite"
+    >
+      <div class="loading-state__brand">
+        SREE'S UNIVERSE
+      </div>
+
+      <div class="loading-state__line">
+        <span
+          #loaderBar
+          class="loading-state__bar"
+        ></span>
+
+        <span
+          #loaderPulse
+          class="loading-state__pulse"
+        ></span>
+      </div>
+
+      <div class="loading-state__meta">
+        <span #status>LOADING</span>
+        <span #progress>01%</span>
+      </div>
+    </div>
+
+    <!-- STATE 2 + 3: READY / WELCOME -->
+    <div
+      #welcomeGroup
+      class="welcome-state"
+    >
+      <p
+        #ready
+        class="welcome-state__ready"
+      >
+        UNIVERSE READY
+      </p>
+
+      <p class="welcome-state__intro">
+        Welcome to
+      </p>
+
+      <h1
+        #title
+        class="welcome-state__title"
+      >
+        Sree's Universe
+      </h1>
+
+      <p
+        #subtitle
+        class="welcome-state__subtitle"
+      >
+        Explore the mind behind the machines.
+      </p>
+
+      <button
+        #enterButton
+        class="enter-button"
+        type="button"
+      >
+        ENTER THE UNIVERSE
+      </button>
+    </div>
+  </section>
+</main>
