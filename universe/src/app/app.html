@@ -5,11 +5,7 @@
     aria-label="Sree's Universe"
   ></canvas>
 
-  <section
-    #bootOverlay
-    class="boot-overlay"
-  >
-    <!-- STATE 1: LOADING -->
+  <section class="boot-overlay">
     <div
       #loader
       class="loading-state"
@@ -20,15 +16,8 @@
       </div>
 
       <div class="loading-state__line">
-        <span
-          #loaderBar
-          class="loading-state__bar"
-        ></span>
-
-        <span
-          #loaderPulse
-          class="loading-state__pulse"
-        ></span>
+        <span #loaderBar class="loading-state__bar"></span>
+        <span #loaderPulse class="loading-state__pulse"></span>
       </div>
 
       <div class="loading-state__meta">
@@ -37,33 +26,22 @@
       </div>
     </div>
 
-    <!-- STATE 2 + 3: READY / WELCOME -->
     <div
       #welcomeGroup
       class="welcome-state"
+      aria-hidden="true"
     >
-      <p
-        #ready
-        class="welcome-state__ready"
-      >
+      <p #ready class="welcome-state__ready">
         UNIVERSE READY
       </p>
 
-      <p class="welcome-state__intro">
-        Welcome to
-      </p>
+      <p class="welcome-state__intro">Welcome to</p>
 
-      <h1
-        #title
-        class="welcome-state__title"
-      >
+      <h1 #title class="welcome-state__title">
         Sree's Universe
       </h1>
 
-      <p
-        #subtitle
-        class="welcome-state__subtitle"
-      >
+      <p #subtitle class="welcome-state__subtitle">
         Explore the mind behind the machines.
       </p>
 
