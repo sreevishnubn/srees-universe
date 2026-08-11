@@ -26,17 +26,11 @@ export class UniverseArrival {
   private loadingTimeline?: gsap.core.Timeline;
   private enterTimeline?: gsap.core.Timeline;
 
-  playLoadingSequence(
-    camera: THREE.PerspectiveCamera,
-    galaxy: Galaxy,
-    elements: ArrivalElements,
-  ): void {
+  playLoadingSequence(camera: THREE.PerspectiveCamera, galaxy: Galaxy, elements: ArrivalElements): void {
     this.loadingTimeline?.kill();
-
     const { loader, loaderBar, loaderPulse, progress, status, readyGroup, welcomeGroup, title, subtitle, enterButton } = elements;
 
     this.phase = 'loading';
-
     gsap.set(loader, { autoAlpha: 1, scale: 1 });
     gsap.set(readyGroup, { autoAlpha: 0, y: 14 });
     gsap.set(welcomeGroup, { autoAlpha: 0, y: 28 });
@@ -69,12 +63,10 @@ export class UniverseArrival {
       this.phase = 'ready';
       status.textContent = 'UNIVERSE READY';
     });
-
     this.loadingTimeline.to(loader, { autoAlpha: 0, duration: 0.45, ease: 'power2.in' });
     this.loadingTimeline.to(readyGroup, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' });
     this.loadingTimeline.to({}, { duration: 0.9 });
     this.loadingTimeline.to(readyGroup, { autoAlpha: 0, y: -10, duration: 0.45, ease: 'power2.in' });
-
     this.loadingTimeline.call(() => { this.phase = 'welcome'; });
     this.loadingTimeline.to(welcomeGroup, { autoAlpha: 1, y: 0, duration: 0.75, ease: 'power3.out' });
     this.loadingTimeline.to(title, { y: 0, scale: 1, duration: 0.85, ease: 'power3.out' }, '-=0.45');
@@ -82,13 +74,7 @@ export class UniverseArrival {
     this.loadingTimeline.to(enterButton, { y: 0, duration: 0.65, ease: 'back.out(1.25)' }, '-=0.3');
   }
 
-  enterUniverse(
-    camera: THREE.PerspectiveCamera,
-    galaxy: Galaxy,
-    warpField: WarpField,
-    homeWorld: HomeWorld,
-    elements: ArrivalElements,
-  ): void {
+  enterUniverse(camera: THREE.PerspectiveCamera, galaxy: Galaxy, warpField: WarpField, homeWorld: HomeWorld, elements: ArrivalElements): void {
     if (this.phase !== 'welcome') return;
 
     this.enterTimeline?.kill();
@@ -120,17 +106,20 @@ export class UniverseArrival {
     this.enterTimeline.to(camera.position, { z: 5, duration: 4.5, ease: 'power4.in' }, '<');
     this.enterTimeline.call(() => { warpField.setSpeed(2.2); });
 
-    this.enterTimeline.to(camera.position, {
-      z: 13,
-      y: 0.8,
-      duration: 2.4,
-      ease: 'power3.out',
-    });
+    this.enterTimeline.to(camera.position, { z: 13, y: 0.8, duration: 2.4, ease: 'power3.out' });
     this.enterTimeline.to(camera, {
       fov: 58,
       duration: 1.8,
       ease: 'power2.out',
       onUpdate: () => camera.updateProjectionMatrix(),
+    }, '<');
+
+    const homeState = { opacity: 0 };
+    this.enterTimeline.to(homeState, {
+      opacity: 1,
+      duration: 2.2,
+      ease: 'power2.out',
+      onUpdate: () => homeWorld.setOpacity(homeState.opacity),
     }, '<');
 
     this.enterTimeline.to(homeWorld.group.scale, {
@@ -140,7 +129,6 @@ export class UniverseArrival {
       duration: 2.6,
       ease: 'power3.out',
     }, '<');
-    this.enterTimeline.to(homeWorld, { opacity: 1, duration: 2.2, ease: 'power2.out' }, '<');
 
     this.enterTimeline.to(warpField.points.material, { opacity: 0, duration: 1.2 });
     this.enterTimeline.call(() => {
