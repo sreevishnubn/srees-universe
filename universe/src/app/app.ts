@@ -98,6 +98,7 @@ export class App implements AfterViewInit, OnDestroy {
       this.engine.cameraManager.camera,
       this.engine.galaxy,
       this.engine.warpField,
+      this.engine.homeWorld,
       this.loadingElements,
     );
   };
