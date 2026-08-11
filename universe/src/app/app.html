@@ -1,23 +1,11 @@
 <main class="universe">
-  <canvas
-    #universeCanvas
-    class="universe__canvas"
-    aria-label="Sree's Universe"
-  ></canvas>
+  <canvas #universeCanvas class="universe__canvas" aria-label="Sree's Universe"></canvas>
 
   <section class="boot-overlay">
     <div #loader class="loading-state" aria-live="polite">
       <div class="loading-state__brand">SREE'S UNIVERSE</div>
-
-      <div class="loading-state__line">
-        <span #loaderBar class="loading-state__bar"></span>
-        <span #loaderPulse class="loading-state__pulse"></span>
-      </div>
-
-      <div class="loading-state__meta">
-        <span #status>LOADING</span>
-        <span #progress>01%</span>
-      </div>
+      <div class="loading-state__line"><span #loaderBar class="loading-state__bar"></span><span #loaderPulse class="loading-state__pulse"></span></div>
+      <div class="loading-state__meta"><span #status>LOADING</span><span #progress>01%</span></div>
     </div>
 
     <div #readyGroup class="ready-state" aria-hidden="true">
@@ -25,18 +13,15 @@
       <p #ready class="ready-state__text">UNIVERSE READY</p>
     </div>
 
+    <div #smokeTransition class="smoke-transition" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
     <div #welcomeGroup class="welcome-state" aria-hidden="true">
       <p class="welcome-state__intro">Welcome to</p>
-
       <h1 #title class="welcome-state__title">Sree's Universe</h1>
-
-      <p #subtitle class="welcome-state__subtitle">
-        Explore the mind behind the machines.
-      </p>
-
-      <button #enterButton class="enter-button" type="button">
-        ENTER THE UNIVERSE
-      </button>
+      <p #subtitle class="welcome-state__subtitle">Explore the mind behind the machines.</p>
+      <button #enterButton class="enter-button" type="button">ENTER THE UNIVERSE</button>
     </div>
   </section>
 </main>
