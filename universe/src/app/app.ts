@@ -64,6 +64,7 @@ export class App implements AfterViewInit, OnDestroy {
     this.arrival.playLoadingSequence(
       this.engine.cameraManager.camera,
       this.engine.galaxy,
+      this.engine.homeWorld,
       this.loadingElements,
     );
 
