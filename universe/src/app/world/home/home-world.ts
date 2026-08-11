@@ -1,10 +1,15 @@
 import * as THREE from 'three';
 
+type SmokeParticle = {
+  mesh: THREE.Mesh;
+  seed: number;
+};
+
 type Car = {
   group: THREE.Group;
   speed: number;
   offset: number;
-  smoke: THREE.Mesh[];
+  smoke: SmokeParticle[];
 };
 
 export class HomeWorld {
@@ -12,14 +17,13 @@ export class HomeWorld {
 
   private readonly trackCurve: THREE.CatmullRomCurve3;
   private readonly cars: Car[] = [];
-  private readonly smokeMaterial: THREE.MeshBasicMaterial;
   private readonly roadMaterial: THREE.MeshStandardMaterial;
+  private readonly smokeMaterial: THREE.MeshBasicMaterial;
   private opacity = 0;
   private elapsed = 0;
 
   constructor() {
     this.group.position.set(0, -2.2, -10);
-    this.group.scale.setScalar(1);
 
     this.trackCurve = new THREE.CatmullRomCurve3(
       [
@@ -48,7 +52,7 @@ export class HomeWorld {
     this.smokeMaterial = new THREE.MeshBasicMaterial({
       color: 0xd9d5ca,
       transparent: true,
-      opacity: 0,
+      opacity: 0.24,
       depthWrite: false,
     });
 
@@ -69,23 +73,29 @@ export class HomeWorld {
       car.group.position.copy(position);
       car.group.rotation.y = Math.atan2(tangent.x, tangent.z);
 
+      // Smoke is deliberately left behind the cars instead of being parented to them.
       car.smoke.forEach((particle, particleIndex) => {
-        const life = (this.elapsed * 0.75 + particleIndex * 0.13 + index * 0.2) % 1;
-        const spread = Math.sin(particleIndex * 7.31) * 0.5;
+        const life = (this.elapsed * 0.48 + particle.seed) % 1;
+        const distance = 0.9 + life * 3.6;
+        const side = Math.sin(particle.seed * 31.7) * 0.48;
 
-        particle.position.set(
-          -tangent.x * (0.7 + life * 3.1) + spread * 0.5,
-          0.18 + life * 0.95,
-          -tangent.z * (0.7 + life * 3.1) + Math.cos(particleIndex * 4.2) * 0.35,
+        particle.mesh.position.set(
+          position.x - tangent.x * distance + side,
+          0.12 + life * 1.0,
+          position.z - tangent.z * distance + Math.cos(particle.seed * 17.3) * 0.35,
         );
 
-        const scale = 0.14 + life * 0.5;
-        particle.scale.setScalar(scale);
-        particle.rotation.z += 0.01;
+        const scale = 0.12 + life * 0.62;
+        particle.mesh.scale.setScalar(scale);
+        particle.mesh.rotation.z += 0.008 + index * 0.002;
+
+        const material = particle.mesh.material;
+        if (!Array.isArray(material)) {
+          material.opacity = this.opacity * (0.26 * (1 - life));
+        }
       });
     });
 
-    // Slow environmental motion keeps the scene alive without moving the camera.
     this.group.rotation.y = Math.sin(this.elapsed * 0.08) * 0.012;
   }
 
@@ -99,11 +109,11 @@ export class HomeWorld {
       if (Array.isArray(material)) {
         material.forEach((item) => {
           item.transparent = true;
-          item.opacity = this.opacity * this.opacityMultiplier(item);
+          item.opacity = this.materialOpacity(item);
         });
       } else {
         material.transparent = true;
-        material.opacity = this.opacity * this.opacityMultiplier(material);
+        material.opacity = this.materialOpacity(material);
       }
     });
   }
@@ -123,10 +133,10 @@ export class HomeWorld {
     });
   }
 
-  private opacityMultiplier(material: THREE.Material): number {
-    if (material === this.smokeMaterial) return 0.32;
-    if (material === this.roadMaterial) return 0.92;
-    return 0.95;
+  private materialOpacity(material: THREE.Material): number {
+    if (material === this.roadMaterial) return this.opacity * 0.92;
+    if (material === this.smokeMaterial) return this.opacity * 0.24;
+    return this.opacity * 0.95;
   }
 
   private createTrack(): void {
@@ -144,16 +154,13 @@ export class HomeWorld {
     });
 
     const lane = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(
-        this.trackCurve.getPoints(220),
-      ),
+      new THREE.BufferGeometry().setFromPoints(this.trackCurve.getPoints(220)),
       laneMaterial,
     );
     lane.position.y = 0.27;
     lane.scale.setScalar(0.72);
     this.group.add(lane);
 
-    const innerCurve = this.trackCurve.clone();
     const curbMaterial = new THREE.MeshBasicMaterial({
       color: 0xffb347,
       transparent: true,
@@ -161,7 +168,7 @@ export class HomeWorld {
     });
 
     const curb = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(innerCurve.getPoints(220)),
+      new THREE.BufferGeometry().setFromPoints(this.trackCurve.getPoints(220)),
       curbMaterial,
     );
     curb.position.y = 0.31;
@@ -284,18 +291,20 @@ export class HomeWorld {
       });
     });
 
-    const smoke: THREE.Mesh[] = [];
-    for (let i = 0; i < 16; i += 1) {
+    this.group.add(carGroup);
+
+    const smoke: SmokeParticle[] = [];
+    for (let i = 0; i < 18; i += 1) {
       const particle = new THREE.Mesh(
-        new THREE.SphereGeometry(0.28, 10, 10),
+        new THREE.SphereGeometry(0.24, 10, 10),
         this.smokeMaterial.clone(),
       );
-      particle.position.y = 0.2;
-      carGroup.add(particle);
-      smoke.push(particle);
+      this.group.add(particle);
+      smoke.push({
+        mesh: particle,
+        seed: i / 18,
+      });
     }
-
-    this.group.add(carGroup);
 
     this.cars.push({
       group: carGroup,
