@@ -1,0 +1,32 @@
+{
+  "version": "6.0",
+  "nxVersion": "23.1.1",
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {},
+    "nonProjectFiles": [
+      {
+        "file": "README.md",
+        "hash": "9435911731941704194"
+      },
+      {
+        "file": "nx.json",
+        "hash": "207397795479391539"
+      },
+      {
+        "file": "package.json",
+        "hash": "876601904546741262"
+      },
+      {
+        "file": "pnpm-lock.yaml",
+        "hash": "8347271282459043412"
+      },
+      {
+        "file": "pnpm-workspace.yaml",
+        "hash": "12948673071870788365"
+      }
+    ]
+  },
+  "externalNodesHash": "13158908072454855340"
+}
