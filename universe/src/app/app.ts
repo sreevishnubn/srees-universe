@@ -24,7 +24,7 @@ export class App implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.engine = new UniverseEngine(this.canvas.nativeElement);
     this.engine.start();
-    this.arrival.playLoadingSequence(this.engine.cameraManager.camera, this.engine.galaxy, this.engine.homeWorld, this.loadingElements);
+    this.arrival.playLoadingSequence(this.engine.cameraManager.camera, this.engine.galaxy, this.engine.cosmicJourney, this.engine.homeWorld, this.loadingElements);
     this.enterButton.nativeElement.addEventListener('click', this.handleEnter);
   }
 
@@ -52,6 +52,6 @@ export class App implements AfterViewInit, OnDestroy {
 
   private handleEnter = (): void => {
     if (!this.engine) return;
-    this.arrival.enterUniverse(this.engine.cameraManager.camera, this.engine.galaxy, this.engine.warpField, this.engine.homeWorld, this.loadingElements);
+    this.arrival.enterUniverse(this.engine.cameraManager.camera, this.engine.galaxy, this.engine.warpField, this.engine.cosmicJourney, this.engine.homeWorld, this.loadingElements);
   };
 }
