@@ -1,70 +1,86 @@
 import * as THREE from 'three';
 
+interface RaceCar {
+  group: THREE.Group;
+  speed: number;
+  start: number;
+  smoke: THREE.Mesh[];
+}
+
 export class CosmicJourney {
   readonly group = new THREE.Group();
 
-  private readonly blackHole = new THREE.Group();
-  private readonly milkyWay = new THREE.Group();
-  private readonly solarSystem = new THREE.Group();
-  private readonly sunLight = new THREE.PointLight(0xffd08a, 0, 90, 2);
-  private readonly earth: THREE.Mesh;
+  private readonly track = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-11, 0, -34), new THREE.Vector3(-7, 0, -28),
+    new THREE.Vector3(-2.5, 0, -23), new THREE.Vector3(0, 0, -17),
+    new THREE.Vector3(0, 0, -10), new THREE.Vector3(0, 0, -4),
+    new THREE.Vector3(0, 0, 4), new THREE.Vector3(3, 0, 10),
+    new THREE.Vector3(10, 0, 15), new THREE.Vector3(14, 0, 8),
+    new THREE.Vector3(12, 0, -1), new THREE.Vector3(8, 0, -10),
+    new THREE.Vector3(2, 0, -18), new THREE.Vector3(-6, 0, -26),
+  ], false, 'catmullrom', 0.45);
+
+  private readonly cars: RaceCar[] = [];
   private elapsed = 0;
+  private opacity = 0;
 
   constructor() {
-    this.createBlackHole();
-    this.createMilkyWay();
-    this.createSolarSystem();
-    this.earth = this.solarSystem.getObjectByName('earth') as THREE.Mesh;
-
-    this.group.add(this.blackHole, this.milkyWay, this.solarSystem);
-    this.setVisibility(0, 0, 0);
+    this.group.position.set(0, -1.9, 0);
+    this.createGround();
+    this.createTrack();
+    this.createTrackDetails();
+    this.createCar(0, 0xd7d9dc, 0.16, 0.0);
+    this.createCar(1, 0x9c6b43, 0.145, 0.055);
+    this.setOpacity(0);
   }
 
   update(): void {
     this.elapsed += 0.016;
+    this.cars.forEach((car, carIndex) => {
+      const t = Math.min(this.elapsed * car.speed + car.start, 1.14);
+      car.group.visible = t < 1.02;
+      if (!car.group.visible) return;
 
-    this.blackHole.rotation.y += 0.002;
-    this.milkyWay.rotation.z += 0.00008;
-    this.solarSystem.rotation.y += 0.0007;
+      const trackT = Math.min(t, 0.999);
+      const position = this.track.getPointAt(trackT);
+      const tangent = this.track.getTangentAt(trackT).normalize();
+      car.group.position.copy(position);
+      car.group.rotation.y = Math.atan2(tangent.x, tangent.z);
 
-    const planets = this.solarSystem.userData['planets'] as THREE.Object3D[];
-    planets.forEach((orbit, index) => {
-      const speed = orbit.userData['speed'] as number;
-      orbit.rotation.y = this.elapsed * speed + index * 0.8;
+      const nearCamera = THREE.MathUtils.smoothstep(t, 0.86, 1.0);
+      car.group.scale.setScalar((carIndex === 0 ? 1 : 0.9) + nearCamera * 0.95);
 
-      const planet = orbit.children[0];
-      if (planet) planet.rotation.y += 0.004;
+      car.smoke.forEach((particle, index) => {
+        const life = (this.elapsed * 0.85 + index * 0.065 + carIndex * 0.18) % 1;
+        const spread = Math.sin(index * 6.7) * 0.55;
+        const rear = tangent.clone().multiplyScalar(-(0.8 + life * 3.2));
+        particle.position.copy(rear);
+        particle.position.x += spread;
+        particle.position.y += 0.15 + life * 0.85;
+        particle.position.z += Math.cos(index * 4.1) * 0.38;
+        particle.scale.setScalar(0.08 + life * 0.58);
+        (particle.material as THREE.MeshBasicMaterial).opacity = this.opacity * 0.22 * (1 - life);
+      });
     });
-
-    this.earth.rotation.y += 0.002;
   }
 
-  setVisibility(blackHole: number, galaxy: number, solar: number): void {
-    this.setGroupOpacity(this.blackHole, blackHole);
-    this.setGroupOpacity(this.milkyWay, galaxy);
-    this.setSolarOpacity(solar);
+  setOpacity(value: number): void {
+    this.opacity = THREE.MathUtils.clamp(value, 0, 1);
+    this.group.traverse((object) => {
+      if (!(object instanceof THREE.Mesh) && !(object instanceof THREE.Line)) return;
+      const material = object.material;
+      if (Array.isArray(material)) material.forEach((item) => { item.transparent = true; item.opacity = this.opacity; });
+      else { material.transparent = true; material.opacity = this.opacity; }
+    });
   }
 
-  setGalaxyOpacity(opacity: number): void {
-    this.setGroupOpacity(this.milkyWay, opacity);
-  }
+  setRaceOpacity(value: number): void { this.setOpacity(value); }
 
-  setBlackHoleOpacity(opacity: number): void {
-    this.setGroupOpacity(this.blackHole, opacity);
-  }
-
-  setSolarOpacity(opacity: number): void {
-    this.setGroupOpacity(this.solarSystem, opacity);
-    this.sunLight.intensity = opacity > 0 ? 3.2 * opacity : 0;
-  }
-
-  getEarth(): THREE.Mesh {
-    return this.earth;
-  }
+  getSmokeOpacity(): number { return this.opacity; }
 
   dispose(): void {
     this.group.traverse((object) => {
-      if (!(object instanceof THREE.Mesh) && !(object instanceof THREE.Points) && !(object instanceof THREE.LineLoop)) return;
+      if (!(object instanceof THREE.Mesh) && !(object instanceof THREE.Line)) return;
       object.geometry.dispose();
       const material = object.material;
       if (Array.isArray(material)) material.forEach((item) => item.dispose());
@@ -72,172 +88,71 @@ export class CosmicJourney {
     });
   }
 
-  private createBlackHole(): void {
-    const core = new THREE.Mesh(
-      new THREE.SphereGeometry(3.1, 64, 64),
-      new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0 }),
-    );
-
-    const disk = new THREE.Mesh(
-      new THREE.TorusGeometry(4.4, 0.72, 24, 160),
-      new THREE.MeshBasicMaterial({
-        color: 0xff9b4a,
-        transparent: true,
-        opacity: 0,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      }),
-    );
-    disk.rotation.x = Math.PI / 2.2;
-
-    const glow = new THREE.Mesh(
-      new THREE.SphereGeometry(5.1, 48, 48),
-      new THREE.MeshBasicMaterial({
-        color: 0xffb35c,
-        transparent: true,
-        opacity: 0,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      }),
-    );
-
-    this.blackHole.add(glow, disk, core);
-    this.blackHole.position.set(0, 0, -15);
+  private createGround(): void {
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(110, 110), new THREE.MeshStandardMaterial({ color: 0x050608, roughness: 0.98, metalness: 0.02, transparent: true, opacity: 0 }));
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.42;
+    this.group.add(ground);
   }
 
-  private createMilkyWay(): void {
-    const count = 18000;
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-    const warm = new THREE.Color(0xffd49a);
-    const cool = new THREE.Color(0xb9d4ff);
+  private createTrack(): void {
+    const road = new THREE.Mesh(new THREE.TubeGeometry(this.track, 260, 2.15, 16, false), new THREE.MeshStandardMaterial({ color: 0x111318, roughness: 0.72, metalness: 0.18, transparent: true, opacity: 0 }));
+    road.scale.y = 0.09;
+    road.position.y = 0.03;
+    this.group.add(road);
 
-    for (let i = 0; i < count; i += 1) {
-      const index = i * 3;
-      const radius = Math.pow(Math.random(), 1.55) * 34;
-      const arm = i % 4;
-      const angle = arm * Math.PI / 2 + radius * 0.28 + (Math.random() - 0.5) * (0.18 + radius * 0.025);
-      positions[index] = Math.cos(angle) * radius;
-      positions[index + 1] = (Math.random() - 0.5) * (0.18 + radius * 0.018);
-      positions[index + 2] = Math.sin(angle) * radius;
+    const center = new THREE.Line(new THREE.BufferGeometry().setFromPoints(this.track.getPoints(260)), new THREE.LineBasicMaterial({ color: 0xf2eee4, transparent: true, opacity: 0 }));
+    center.position.y = 0.27;
+    center.scale.setScalar(0.83);
+    this.group.add(center);
+  }
 
-      const color = warm.clone().lerp(cool, radius / 34);
-      colors[index] = color.r;
-      colors[index + 1] = color.g;
-      colors[index + 2] = color.b;
+  private createTrackDetails(): void {
+    const points = this.track.getPoints(34);
+    points.forEach((point, index) => {
+      const tangent = this.track.getTangentAt(index / 34).normalize();
+      const normal = new THREE.Vector3(-tangent.z, 0, tangent.x);
+      [-1, 1].forEach((side) => {
+        const curb = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.12, 1.15), new THREE.MeshStandardMaterial({ color: index % 2 === 0 ? 0xe7e3d9 : 0x292c31, roughness: 0.75, transparent: true, opacity: 0 }));
+        curb.position.copy(point).addScaledVector(normal, side * 2.45);
+        curb.position.y = 0.05;
+        curb.rotation.y = Math.atan2(tangent.x, tangent.z);
+        this.group.add(curb);
+      });
+    });
+  }
+
+  private createCar(index: number, color: number, speed: number, start: number): void {
+    const car = new THREE.Group();
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.22, metalness: 0.72, transparent: true, opacity: 0 });
+    const darkMaterial = new THREE.MeshStandardMaterial({ color: 0x090b0e, roughness: 0.12, metalness: 0.5, transparent: true, opacity: 0 });
+
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.38, 3.2), bodyMaterial);
+    body.position.y = 0.48;
+    const hood = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.2, 1.0), bodyMaterial);
+    hood.position.set(0, 0.57, -1.05);
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.38, 1.25), darkMaterial);
+    cabin.position.set(0, 0.78, 0.15);
+    const spoiler = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.08, 0.18), darkMaterial);
+    spoiler.position.set(0, 0.72, 1.35);
+    car.add(body, hood, cabin, spoiler);
+
+    [-0.78, 0.78].forEach((x) => [-1.03, 1.03].forEach((z) => {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.18, 18), darkMaterial);
+      wheel.rotation.z = Math.PI / 2;
+      wheel.position.set(x, 0.28, z);
+      car.add(wheel);
+    }));
+
+    const smoke: THREE.Mesh[] = [];
+    for (let i = 0; i < 18; i += 1) {
+      const particle = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 10), new THREE.MeshBasicMaterial({ color: 0xbcb7ae, transparent: true, opacity: 0, depthWrite: false }));
+      particle.position.y = 0.18;
+      car.add(particle);
+      smoke.push(particle);
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const stars = new THREE.Points(
-      geometry,
-      new THREE.PointsMaterial({ size: 0.055, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }),
-    );
-
-    const background = new THREE.Points(
-      this.createBackgroundStars(),
-      new THREE.PointsMaterial({ color: 0xffffff, size: 0.028, transparent: true, opacity: 0, depthWrite: false }),
-    );
-
-    this.milkyWay.add(background, stars);
-    this.milkyWay.position.set(0, 0, -34);
-  }
-
-  private createBackgroundStars(): THREE.BufferGeometry {
-    const count = 4500;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i += 1) {
-      const index = i * 3;
-      positions[index] = (Math.random() - 0.5) * 110;
-      positions[index + 1] = (Math.random() - 0.5) * 90;
-      positions[index + 2] = (Math.random() - 0.5) * 90;
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    return geometry;
-  }
-
-  private createSolarSystem(): void {
-    const sun = new THREE.Mesh(
-      new THREE.SphereGeometry(2.15, 64, 64),
-      new THREE.MeshBasicMaterial({ color: 0xffc45c, transparent: true, opacity: 0 }),
-    );
-    this.solarSystem.add(sun);
-    this.sunLight.position.copy(sun.position);
-    this.solarSystem.add(this.sunLight);
-
-    const configs = [
-      [0.24, 3.1, 0x9d958a, 1.7],
-      [0.42, 4.15, 0xd7a16f, 1.3],
-      [0.46, 5.25, 0x4f79a8, 1.0],
-      [0.32, 6.45, 0xa95f45, 0.78],
-      [1.05, 8.4, 0xb99068, 0.42],
-      [0.88, 10.7, 0xb8aa88, 0.31],
-      [0.65, 12.7, 0x79a9bf, 0.22],
-      [0.62, 14.6, 0x4968a0, 0.16],
-    ] as const;
-
-    const planets: THREE.Object3D[] = [];
-    configs.forEach(([size, radius, color, speed], index) => {
-      const orbit = new THREE.Group();
-      orbit.userData['speed'] = speed;
-      orbit.rotation.y = index * 0.8;
-
-      const planet = new THREE.Mesh(
-        new THREE.SphereGeometry(size, 32, 32),
-        new THREE.MeshStandardMaterial({ color, roughness: 0.86, metalness: 0, transparent: true, opacity: 0 }),
-      );
-      planet.position.x = radius;
-      planet.userData['radius'] = radius;
-      if (index === 2) planet.name = 'earth';
-      orbit.add(planet);
-      this.solarSystem.add(orbit);
-      planets.push(orbit);
-
-      const orbitLine = new THREE.LineLoop(
-        new THREE.BufferGeometry().setFromPoints(this.circlePoints(radius)),
-        new THREE.LineBasicMaterial({ color: 0x647080, transparent: true, opacity: 0.055 }),
-      );
-      this.solarSystem.add(orbitLine);
-
-      if (index === 5) {
-        const rings = new THREE.Mesh(
-          new THREE.RingGeometry(size * 1.35, size * 2.15, 64),
-          new THREE.MeshBasicMaterial({ color: 0xc9b895, transparent: true, opacity: 0, side: THREE.DoubleSide }),
-        );
-        rings.rotation.x = Math.PI / 2;
-        planet.add(rings);
-      }
-
-      if (index === 2) {
-        const moon = new THREE.Mesh(
-          new THREE.SphereGeometry(0.12, 20, 20),
-          new THREE.MeshStandardMaterial({ color: 0xb8b8b8, roughness: 0.9, transparent: true, opacity: 0 }),
-        );
-        moon.position.x = size * 2.5;
-        planet.add(moon);
-      }
-    });
-
-    this.solarSystem.userData['planets'] = planets;
-    this.solarSystem.position.set(0, 0, -22);
-  }
-
-  private circlePoints(radius: number): THREE.Vector3[] {
-    return Array.from({ length: 128 }, (_, index) => {
-      const angle = (index / 128) * Math.PI * 2;
-      return new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-    });
-  }
-
-  private setGroupOpacity(group: THREE.Group, opacity: number): void {
-    group.traverse((object) => {
-      if (!(object instanceof THREE.Mesh) && !(object instanceof THREE.Points) && !(object instanceof THREE.LineLoop)) return;
-      const material = object.material;
-      if (Array.isArray(material)) material.forEach((item) => { item.transparent = true; item.opacity = opacity; });
-      else { material.transparent = true; material.opacity = opacity; }
-    });
+    this.group.add(car);
+    this.cars.push({ group: car, speed, start, smoke });
   }
 }
