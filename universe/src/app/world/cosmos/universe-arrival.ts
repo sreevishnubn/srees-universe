@@ -53,16 +53,16 @@ export class UniverseArrival {
     journey.setVisibility(0, 0, 0);
     homeWorld.setOpacity(0);
 
-    const state = { value: 1 };
+    const state = { value: 100 };
     this.loadingTimeline = gsap.timeline();
 
-    // 1. Pure black loading countdown: 01 -> 100.
+    // 1. Loading countdown: 100 -> 00.
     this.loadingTimeline.to(state, {
-      value: 100,
+      value: 0,
       duration: 5.5,
       ease: 'none',
       onUpdate: () => {
-        const value = Math.floor(state.value);
+        const value = Math.ceil(state.value);
         progress.textContent = `${String(value).padStart(2, '0')}%`;
         loaderBar.style.width = `${value}%`;
         loaderPulse.style.left = `${value}%`;
@@ -90,7 +90,7 @@ export class UniverseArrival {
     this.loadingTimeline.to(journey.group.position, { z: -8, duration: 4.2, ease: 'power2.out' });
     this.loadingTimeline.to(camera.position, { z: 16, duration: 4.2, ease: 'power2.out' }, '<');
 
-    // 4. Move from the galaxy into the Solar System.
+    // 4. Move from the Milky Way into the Solar System.
     this.loadingTimeline.call(() => {
       this.phase = 'solar-system';
       status.textContent = 'SOLAR SYSTEM';
@@ -99,7 +99,7 @@ export class UniverseArrival {
     this.loadingTimeline.to(journey.group.position, { z: 10, duration: 3.6, ease: 'power2.inOut' });
     this.loadingTimeline.to(camera.position, { z: 11, duration: 3.6, ease: 'power2.inOut' }, '<');
 
-    // 5. Earth becomes the destination.
+    // 5. Approach Earth.
     this.loadingTimeline.call(() => {
       this.phase = 'earth';
       status.textContent = 'EARTH';
@@ -107,10 +107,10 @@ export class UniverseArrival {
     this.loadingTimeline.to(camera.position, { x: 5.8, y: 2.2, z: 8, duration: 2.8, ease: 'power3.inOut' });
     this.loadingTimeline.to(journey.getEarth().scale, { x: 2.5, y: 2.5, z: 2.5, duration: 2.8, ease: 'power3.out' }, '<');
 
-    // 6. Reveal Sree's Earth only after the cosmic journey.
+    // 6. Reveal Sree's Earth.
     this.loadingTimeline.call(() => {
       this.phase = 'welcome';
-      status.textContent = 'WELCOME TO SREE\'S EARTH';
+      status.textContent = "WELCOME TO SREE'S EARTH";
     });
     this.loadingTimeline.to(smokeTransition, { autoAlpha: 1, duration: 0.45 });
     this.loadingTimeline.to(welcomeGroup, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out' });
