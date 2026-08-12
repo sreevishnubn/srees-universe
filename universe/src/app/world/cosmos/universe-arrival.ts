@@ -19,7 +19,7 @@ export interface ArrivalElements {
   enterButton: HTMLButtonElement;
 }
 
-type UniversePhase = 'loading' | 'black-hole' | 'galaxy' | 'solar-system' | 'earth' | 'welcome' | 'entering' | 'home';
+type UniversePhase = 'loading' | 'race' | 'welcome' | 'entering' | 'home';
 
 export class UniverseArrival {
   private phase: UniversePhase = 'loading';
@@ -39,16 +39,17 @@ export class UniverseArrival {
     this.phase = 'loading';
     gsap.set(loader, { autoAlpha: 1 });
     gsap.set(readyGroup, { autoAlpha: 0 });
-    gsap.set(welcomeGroup, { autoAlpha: 0, y: 28 });
+    gsap.set(welcomeGroup, { autoAlpha: 0, y: 24 });
+    gsap.set([title, subtitle, enterButton], { y: 24 });
 
-    camera.position.set(0, 0, 24);
+    camera.position.set(0, 1.1, 15);
     camera.rotation.set(0, 0, 0);
-    camera.lookAt(0, 0, 0);
-    camera.fov = 55;
+    camera.lookAt(0, 0, -12);
+    camera.fov = 48;
     camera.updateProjectionMatrix();
 
     galaxy.setOpacity(0);
-    journey.setVisibility(0, 0, 0);
+    journey.setOpacity(0);
     homeWorld.setOpacity(0);
 
     const state = { value: 100 };
@@ -56,7 +57,7 @@ export class UniverseArrival {
 
     this.loadingTimeline.to(state, {
       value: 0,
-      duration: 5.5,
+      duration: 4.8,
       ease: 'none',
       onUpdate: () => {
         const value = Math.ceil(state.value);
@@ -66,48 +67,37 @@ export class UniverseArrival {
       },
     });
 
+    // The black screen remains the visual base. Only the race world fades in after loading.
     this.loadingTimeline.call(() => {
-      this.phase = 'black-hole';
-      status.textContent = 'ENTERING THE CORE';
-      journey.setBlackHoleOpacity(1);
+      this.phase = 'race';
+      status.textContent = 'RACE INITIALIZED';
+      journey.setOpacity(1);
     });
+
     this.loadingTimeline.to(loader, { autoAlpha: 0, duration: 0.45 });
-    this.loadingTimeline.to(camera.position, { z: 4.2, duration: 3.2, ease: 'power3.in' });
-    this.loadingTimeline.to(journey.group.position, { z: 5, duration: 3.2, ease: 'power3.in' }, '<');
+    this.loadingTimeline.to(camera.position, {
+      z: 5.8,
+      duration: 2.8,
+      ease: 'power3.out',
+    }, '<');
 
-    this.loadingTimeline.call(() => {
-      this.phase = 'galaxy';
-      status.textContent = 'MILKY WAY';
-      journey.setGalaxyOpacity(1);
-      journey.setBlackHoleOpacity(0);
-      camera.position.z = 8;
-    });
-    this.loadingTimeline.to(journey.group.position, { z: -8, duration: 4.2, ease: 'power2.out' });
-    this.loadingTimeline.to(camera.position, { z: 16, duration: 4.2, ease: 'power2.out' }, '<');
-
-    this.loadingTimeline.call(() => {
-      this.phase = 'solar-system';
-      status.textContent = 'SOLAR SYSTEM';
-      journey.setSolarOpacity(1);
-    });
-    this.loadingTimeline.to(journey.group.position, { z: 10, duration: 3.6, ease: 'power2.inOut' });
-    this.loadingTimeline.to(camera.position, { z: 11, duration: 3.6, ease: 'power2.inOut' }, '<');
-
-    this.loadingTimeline.call(() => {
-      this.phase = 'earth';
-      status.textContent = 'EARTH';
-    });
-    this.loadingTimeline.to(camera.position, { x: 5.8, y: 2.2, z: 8, duration: 2.8, ease: 'power3.inOut' });
-    this.loadingTimeline.to(journey.getEarth().scale, { x: 2.5, y: 2.5, z: 2.5, duration: 2.8, ease: 'power3.out' }, '<');
+    // Let the cars approach the viewer before revealing the welcome layer.
+    this.loadingTimeline.to({}, { duration: 3.7 });
 
     this.loadingTimeline.call(() => {
       this.phase = 'welcome';
       status.textContent = "WELCOME TO SREE'S EARTH";
     });
-    this.loadingTimeline.to(welcomeGroup, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out' });
-    this.loadingTimeline.to(title, { y: 0, scale: 1, duration: 0.8, ease: 'power3.out' }, '-=0.45');
-    this.loadingTimeline.to(subtitle, { y: 0, duration: 0.6 }, '-=0.35');
-    this.loadingTimeline.to(enterButton, { y: 0, duration: 0.6, ease: 'back.out(1.2)' }, '-=0.2');
+
+    this.loadingTimeline.to(welcomeGroup, {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.85,
+      ease: 'power3.out',
+    });
+    this.loadingTimeline.to(title, { y: 0, duration: 0.65, ease: 'power3.out' }, '-=0.48');
+    this.loadingTimeline.to(subtitle, { y: 0, duration: 0.55, ease: 'power2.out' }, '-=0.34');
+    this.loadingTimeline.to(enterButton, { y: 0, duration: 0.65, ease: 'back.out(1.2)' }, '-=0.22');
   }
 
   enterUniverse(
@@ -125,18 +115,28 @@ export class UniverseArrival {
     elements.enterButton.disabled = true;
 
     this.enterTimeline = gsap.timeline();
-    this.enterTimeline.to(elements.welcomeGroup, { autoAlpha: 0, duration: 0.6, ease: 'power3.in' });
+    this.enterTimeline.to(elements.welcomeGroup, { autoAlpha: 0, duration: 0.55, ease: 'power3.in' });
     this.enterTimeline.call(() => {
-      journey.setVisibility(0, 0, 0);
+      journey.setOpacity(0);
       homeWorld.setOpacity(1);
       warpField.setActive(true);
       warpField.setSpeed(0.2);
     });
-    this.enterTimeline.to(camera.position, { z: 2.5, duration: 3.2, ease: 'power3.in' });
-    this.enterTimeline.to(camera, { fov: 72, duration: 2.2, ease: 'power3.in', onUpdate: () => camera.updateProjectionMatrix() }, '<');
-    this.enterTimeline.to(warpField.points.material, { opacity: 0.85, duration: 0.55 }, '-=1.4');
-    this.enterTimeline.to(warpField.points.material, { opacity: 0, duration: 0.9 });
-    this.enterTimeline.to(camera, { fov: 55, duration: 1.2, ease: 'power2.out', onUpdate: () => camera.updateProjectionMatrix() });
+    this.enterTimeline.to(camera.position, { z: 1.8, duration: 2.8, ease: 'power3.in' });
+    this.enterTimeline.to(camera, {
+      fov: 68,
+      duration: 2.1,
+      ease: 'power3.in',
+      onUpdate: () => camera.updateProjectionMatrix(),
+    }, '<');
+    this.enterTimeline.to(warpField.points.material, { opacity: 0.8, duration: 0.5 }, '-=1.2');
+    this.enterTimeline.to(warpField.points.material, { opacity: 0, duration: 0.8 });
+    this.enterTimeline.to(camera, {
+      fov: 55,
+      duration: 1.0,
+      ease: 'power2.out',
+      onUpdate: () => camera.updateProjectionMatrix(),
+    });
     this.enterTimeline.call(() => {
       warpField.setActive(false);
       warpField.setSpeed(0);
