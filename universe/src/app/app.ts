@@ -16,7 +16,6 @@ export class App implements AfterViewInit, OnDestroy {
   @ViewChild('title', { static: true }) private readonly title!: ElementRef<HTMLElement>;
   @ViewChild('subtitle', { static: true }) private readonly subtitle!: ElementRef<HTMLElement>;
   @ViewChild('enterButton', { static: true }) private readonly enterButton!: ElementRef<HTMLButtonElement>;
-  @ViewChild('smokeTransition', { static: true }) private readonly smokeTransition!: ElementRef<HTMLElement>;
 
   private engine?: UniverseEngine;
   private readonly arrival = new UniverseArrival();
@@ -24,7 +23,13 @@ export class App implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.engine = new UniverseEngine(this.canvas.nativeElement);
     this.engine.start();
-    this.arrival.playLoadingSequence(this.engine.cameraManager.camera, this.engine.galaxy, this.engine.cosmicJourney, this.engine.homeWorld, this.loadingElements);
+    this.arrival.playLoadingSequence(
+      this.engine.cameraManager.camera,
+      this.engine.galaxy,
+      this.engine.cosmicJourney,
+      this.engine.homeWorld,
+      this.loadingElements,
+    );
     this.enterButton.nativeElement.addEventListener('click', this.handleEnter);
   }
 
@@ -46,12 +51,18 @@ export class App implements AfterViewInit, OnDestroy {
       title: this.title.nativeElement,
       subtitle: this.subtitle.nativeElement,
       enterButton: this.enterButton.nativeElement,
-      smokeTransition: this.smokeTransition.nativeElement,
     };
   }
 
   private handleEnter = (): void => {
     if (!this.engine) return;
-    this.arrival.enterUniverse(this.engine.cameraManager.camera, this.engine.galaxy, this.engine.warpField, this.engine.cosmicJourney, this.engine.homeWorld, this.loadingElements);
+    this.arrival.enterUniverse(
+      this.engine.cameraManager.camera,
+      this.engine.galaxy,
+      this.engine.warpField,
+      this.engine.cosmicJourney,
+      this.engine.homeWorld,
+      this.loadingElements,
+    );
   };
 }
