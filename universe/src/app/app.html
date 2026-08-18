@@ -1,22 +1,39 @@
 <main class="universe">
   <canvas #universeCanvas class="universe__canvas" aria-label="Sree's Universe"></canvas>
-
   <section class="boot-overlay">
     <div #loader class="loading-state" aria-live="polite">
       <div class="loading-state__line"><span #loaderBar class="loading-state__bar"></span><span #loaderPulse class="loading-state__pulse"></span></div>
       <div class="loading-state__meta"><span #status>INITIALIZING</span><span #progress>100%</span></div>
     </div>
-
-    <div #readyGroup class="ready-state" aria-hidden="true">
-      <div class="ready-state__mark">✦</div>
-      <p #ready class="ready-state__text">UNIVERSE READY</p>
-    </div>
-
     <div #welcomeGroup class="welcome-state" aria-hidden="true">
       <p class="welcome-state__intro">Welcome to</p>
-      <h1 #title class="welcome-state__title">Sree's Earth</h1>
-      <p #subtitle class="welcome-state__subtitle">A small world inside a much bigger universe.</p>
+      <h1 #title class="welcome-state__title">Sree's Universe</h1>
+      <p #subtitle class="welcome-state__subtitle">Engineer · Builder · Creator</p>
       <button #enterButton class="enter-button" type="button">ENTER THE UNIVERSE</button>
     </div>
+  </section>
+  <section class="profile-world">
+    <header class="profile-hero">
+      <div>
+        <p class="eyebrow">SREE'S UNIVERSE / PROFILE</p>
+        <h2>Sree Vishnu B N</h2>
+        <p class="profile-role">Cloud Engineer · SRE · Automation Engineer · AI & Full-Stack Builder</p>
+        <p class="profile-summary">I build reliable cloud systems, automate engineering workflows, create AI-powered tools, and turn ideas into products and visual experiences.</p>
+        <div class="profile-actions"><a href="mailto:sreevishnubn@gmail.com">CONTACT</a><a href="https://github.com/sreevishnubn" target="_blank" rel="noreferrer">GITHUB ↗</a></div>
+      </div>
+      <div class="hero-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+    </header>
+    <div class="profile-grid">
+      <article class="profile-card profile-card--wide"><p class="eyebrow">01 / ABOUT</p><h3>Engineer with a creator's mindset.</h3><p>I work across SRE, DevOps, cloud infrastructure, automation, backend and frontend engineering. Outside pure engineering, I work with dance, drama, photography, film production, visual design and creative storytelling.</p></article>
+      <article class="profile-card"><p class="eyebrow">02 / CORE</p><h3>What I build</h3><ul class="clean-list"><li>Cloud & SRE platforms</li><li>CI/CD and infrastructure automation</li><li>AI agents and developer tools</li><li>REST APIs and full-stack applications</li><li>Monitoring, observability and reliability workflows</li></ul></article>
+      <article class="profile-card"><p class="eyebrow">03 / CLOUD & SRE</p><div class="tag-list"><span>AWS</span><span>Azure</span><span>Kubernetes</span><span>Docker</span><span>Terraform</span><span>Jenkins</span><span>Dynatrace</span><span>New Relic</span><span>GitHub Actions</span></div></article>
+      <article class="profile-card"><p class="eyebrow">04 / ENGINEERING</p><div class="tag-list"><span>Python</span><span>Java</span><span>SQL</span><span>Bash</span><span>FastAPI</span><span>Flask</span><span>React</span><span>Angular</span><span>TypeScript</span><span>JavaScript</span><span>REST</span></div></article>
+      <article class="profile-card"><p class="eyebrow">05 / DATA & PLATFORM</p><div class="tag-list"><span>MongoDB</span><span>PostgreSQL</span><span>MySQL</span><span>Redis</span><span>Kafka</span><span>Power BI</span><span>Prometheus</span><span>Grafana</span></div></article>
+      <article class="profile-card profile-card--wide"><p class="eyebrow">06 / EXPERIENCE</p><div class="timeline"><div><b>SRE / Cloud / Automation</b><span>Production monitoring · cloud reliability · incident automation · infrastructure workflows</span></div><div><b>Vivarttana Technologies Pvt. Ltd.</b><span>Technology internship experience</span></div><div><b>Anvesana TBI</b><span>Program Executive internship experience</span></div><div><b>SRK Technologies</b><span>Technology internship experience</span></div></div></article>
+      <article class="profile-card"><p class="eyebrow">07 / CERTIFICATIONS</p><div class="timeline"><div><b>Microsoft Azure Developer Associate</b><span>AZ-204 · 2026</span></div><div><b>AWS Solutions Architect path</b><span>Cloud architecture & infrastructure</span></div></div></article>
+      <article class="profile-card"><p class="eyebrow">08 / SELECTED BUILDS</p><div class="project-list"><b>MyMate.AI</b><span>AI assistant experience</span><b>CheckMate</b><span>Website audit tooling</span><b>Leaf Care</b><span>CNN + Flask AI application</span><b>Virtual Queue</b><span>Queue management platform</span><b>E-Cart</b><span>Full-stack commerce project</span></div></article>
+      <article class="profile-card profile-card--wide"><p class="eyebrow">09 / CREATIVE UNIVERSE</p><h3>Engineering is only one planet.</h3><div class="creative-grid"><span>🎬 Film production</span><span>💃 Dance & drama</span><span>📷 Nature photography</span><span>🎨 UI / UX design</span><span>🎥 Short films</span><span>🧠 Creative direction</span></div></article>
+    </div>
+    <footer class="profile-footer"><span>BUILDING SYSTEMS. BUILDING STORIES.</span><span>© SREE VISHNU B N</span></footer>
   </section>
 </main>
