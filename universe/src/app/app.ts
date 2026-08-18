@@ -16,11 +16,13 @@ export class App implements AfterViewInit, OnDestroy {
   @ViewChild('title', { static: true }) private readonly title!: ElementRef<HTMLElement>;
   @ViewChild('subtitle', { static: true }) private readonly subtitle!: ElementRef<HTMLElement>;
   @ViewChild('enterButton', { static: true }) private readonly enterButton!: ElementRef<HTMLButtonElement>;
+  @ViewChild('profile', { static: true }) private readonly profile!: ElementRef<HTMLElement>;
 
   private engine?: UniverseEngine;
   private readonly arrival = new UniverseArrival();
 
   ngAfterViewInit(): void {
+    this.profile.nativeElement.setAttribute('aria-hidden', 'true');
     this.engine = new UniverseEngine(this.canvas.nativeElement);
     this.engine.start();
     this.arrival.playLoadingSequence(
@@ -64,5 +66,9 @@ export class App implements AfterViewInit, OnDestroy {
       this.engine.homeWorld,
       this.loadingElements,
     );
+    window.setTimeout(() => {
+      this.profile.nativeElement.classList.add('profile-world--visible');
+      this.profile.nativeElement.setAttribute('aria-hidden', 'false');
+    }, 5200);
   };
 }
